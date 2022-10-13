@@ -17,6 +17,6 @@ RUN apt-get update \
     && apt-get -y install jq
 
 COPY . /home/install
-RUN chmod +x /home/install/script.sh
+RUN chmod 777 -R /home/install/
 WORKDIR /home/install
 ENTRYPOINT ["/home/install/script.sh"]
