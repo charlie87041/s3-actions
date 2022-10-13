@@ -1,0 +1,11 @@
+name: "CoreServices S3 actions"
+description: "starts a bucket for a branch and creates required credentials"
+author: charlie87041
+outputs:
+  BUCKET_ACCESS_KEY:
+    description: ACCESS KEY FOR AWS CLI
+  BUCKET_ACCESS_ID:
+    description: ACCESS ID FOR AWS CLI
+runs:
+  using: docker
+  image: Dockerfile
