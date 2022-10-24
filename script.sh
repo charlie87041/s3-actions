@@ -66,7 +66,8 @@ else
 fi
 populate_bucket
 }
-
+echo 'where are we'
+echo `pwd`
 start_proc
 
 aws configure --profile s3-actions <<-EOF > /dev/null 2>&1
