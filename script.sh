@@ -22,7 +22,7 @@ fi
 
 BUCKET=$AWS_S3_BUCKET
 POLICY="policy${BUCKET}"
-USER="user_${BUCKET}"
+USER="${BUCKET}"
 REGION=us-west-1
 
 aws configure --profile s3-actions <<-EOF > /dev/null 2>&1
@@ -66,8 +66,6 @@ else
 fi
 populate_bucket
 }
-echo 'where are we'
-echo `pwd`
 start_proc
 
 aws configure --profile s3-actions <<-EOF > /dev/null 2>&1
