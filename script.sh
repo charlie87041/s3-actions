@@ -32,7 +32,7 @@ ${AWS_REGION}
 text
 EOF
 create_user () {
-    `cp /home/install/resources/bucket_policy.json .` && sed -i "s/SOME_USER/$BUCKET/g" 'bucket_policy.json'
+    `cp /home/install/resources/bucket_policy.json .` && sed -i "s/$USER/$BUCKET/g" 'bucket_policy.json'
     aws iam create-policy --policy-name $POLICY --policy-document file:home/install/bucket_policy.json && \
     aws iam create-user --user-name $USER --region $REGION  && \
     ARN=$(aws iam list-policies --query 'Policies[?PolicyName==`'"$POLICY"'`]'.Arn --output text) && aws iam attach-user-policy --policy-arn $ARN --user-name $USER && \
@@ -66,8 +66,7 @@ else
 fi
 populate_bucket
 }
-echo 'where are we'
-echo `pwd`
+
 start_proc
 
 aws configure --profile s3-actions <<-EOF > /dev/null 2>&1
