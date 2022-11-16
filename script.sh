@@ -17,7 +17,7 @@ fi
 
 if [ -z "$AWS_SECRET_REGION" ]; then
   echo "AWS_SECRET_REGION is not set. Falling back to us-west-1."
-  AWS_SECRET_REGION='us-west-1'
+  AWS_SECRET_REGION='eu-south-2'
 fi
 
 BUCKET=$AWS_S3_BUCKET
