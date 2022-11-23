@@ -42,13 +42,15 @@ generate_keys () {
     RSP=$(aws iam create-access-key --user-name $USER);
     BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId');
     BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey');
+    echo "user_id=$BUCKET_ACCESS_ID" >> $GITHUB_OUTPUT
+    echo "user_key=$BUCKET_ACCESS_KEY" >> $GITHUB_OUTPUT
     echo "::set-output name=BUCKET_ACCESS_KEY::$BUCKET_ACCESS_KEY"
     echo "::set-output name=BUCKET_ACCESS_ID::$BUCKET_ACCESS_ID"
 }
 empty_keys () {
 
-    export BUCKET_ACCESS_ID='NONE';
-    export BUCKET_ACCESS_KEY='NONE';
+    echo "user_id=NONE" >> $GITHUB_OUTPUT
+    echo "user_key=NONE" >> $GITHUB_OUTPUT
     echo "::set-output name=BUCKET_ACCESS_KEY::NONE"
     echo "::set-output name=BUCKET_ACCESS_ID::NONE"
 }
