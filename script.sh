@@ -40,8 +40,8 @@ create_user () {
 }
 generate_keys () {
     RSP=$(aws iam create-access-key --user-name $USER);
-    export BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId');
-    export BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey');
+    BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId');
+    BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey');
     echo "::set-output name=BUCKET_ACCESS_KEY::$BUCKET_ACCESS_KEY"
     echo "::set-output name=BUCKET_ACCESS_ID::$BUCKET_ACCESS_ID"
 }
