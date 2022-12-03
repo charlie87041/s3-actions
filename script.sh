@@ -46,12 +46,7 @@ generate_keys () {
     echo "AWS_SECRET_ACCESS_KEY=${BUCKET_ACCESS_KEY}" >> .env;
     echo "AWS_DEFAULT_REGION=${AWS_SECRET_REGION}" >> .env;
     echo "AWS_USE_PATH_STYLE_ENDPOINT=false" >> .env;
-
-AWS_ACCESS_KEY_ID=AKIAULPRBHTPZNJWKJNP
-AWS_SECRET_ACCESS_KEY=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
-AWS_DEFAULT_REGION=us-west-1
-AWS_BUCKET=corestagingbucket
-AWS_USE_PATH_STYLE_ENDPOINT=false
+    echo "COPIED S3 CONFIG TO ENV FILE";
 }
 empty_keys () {
     echo "BUCKET_ACCESS_KEY=NONE" >> $GITHUB_OUTPUT
@@ -69,8 +64,9 @@ start_proc () {
 `aws s3api head-bucket --bucket $BUCKET`
 if [[ $? -eq 0 ]] ; then
     echo 'bucket exists';
+    generate_keys
 else    
-    `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION` &&  aws iam get-user --user-name $USER &&  generate_keys || create_user
+    `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION` &&  aws iam get-user --user-name $USER &&  echo 'user exists' || create_user
 fi
 populate_bucket
 }
