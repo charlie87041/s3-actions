@@ -24,7 +24,6 @@ BUCKET=$AWS_S3_BUCKET
 POLICY="policy${BUCKET}"
 USER="${BUCKET}"
 REGION=us-west-1
-ls
 aws configure --profile s3-actions <<-EOF > /dev/null 2>&1
 ${AWS_ACCESS_KEY_ID}
 ${AWS_SECRET_ACCESS_KEY}
@@ -42,10 +41,11 @@ generate_keys () {
     RSP=$(aws iam create-access-key --user-name $USER);
     BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId');
     BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey');
-    echo "AWS_ACCESS_KEY_ID=${BUCKET_ACCESS_ID}" >> .env
-    echo "AWS_SECRET_ACCESS_KEY=${BUCKET_ACCESS_KEY}" >> .env
-    echo "AWS_DEFAULT_REGION=${AWS_SECRET_REGION}" >> .env
-    echo "AWS_USE_PATH_STYLE_ENDPOINT=false" >> .env
+    echo "${BUCKET_ACCESS_ID}";
+    echo "AWS_ACCESS_KEY_ID=${BUCKET_ACCESS_ID}" >> .env;
+    echo "AWS_SECRET_ACCESS_KEY=${BUCKET_ACCESS_KEY}" >> .env;
+    echo "AWS_DEFAULT_REGION=${AWS_SECRET_REGION}" >> .env;
+    echo "AWS_USE_PATH_STYLE_ENDPOINT=false" >> .env;
 
 AWS_ACCESS_KEY_ID=AKIAULPRBHTPZNJWKJNP
 AWS_SECRET_ACCESS_KEY=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
@@ -70,7 +70,7 @@ start_proc () {
 if [[ $? -eq 0 ]] ; then
     echo 'bucket exists';
 else    
-    `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION` &&  aws iam get-user --user-name $USER && echo 'User exists' || create_user
+    `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION` &&  aws iam get-user --user-name $USER &&  generate_keys || create_user
 fi
 populate_bucket
 }
