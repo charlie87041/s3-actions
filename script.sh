@@ -24,7 +24,7 @@ BUCKET=$AWS_S3_BUCKET
 POLICY="policy${BUCKET}"
 USER="${BUCKET}"
 REGION=us-west-1
-
+ls
 aws configure --profile s3-actions <<-EOF > /dev/null 2>&1
 ${AWS_ACCESS_KEY_ID}
 ${AWS_SECRET_ACCESS_KEY}
