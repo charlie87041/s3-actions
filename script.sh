@@ -42,8 +42,16 @@ generate_keys () {
     RSP=$(aws iam create-access-key --user-name $USER);
     BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId');
     BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey');
-    echo "BUCKET_ACCESS_KEY=NONE" >> $BUCKET_ACCESS_KEY
-    echo "BUCKET_ACCESS_ID=NONE" >> $BUCKET_ACCESS_ID
+    echo "AWS_ACCESS_KEY_ID=${BUCKET_ACCESS_ID}" >> .env
+    echo "AWS_SECRET_ACCESS_KEY=${BUCKET_ACCESS_KEY}" >> .env
+    echo "AWS_DEFAULT_REGION=${AWS_SECRET_REGION}" >> .env
+    echo "AWS_USE_PATH_STYLE_ENDPOINT=false" >> .env
+
+AWS_ACCESS_KEY_ID=AKIAULPRBHTPZNJWKJNP
+AWS_SECRET_ACCESS_KEY=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
+AWS_DEFAULT_REGION=us-west-1
+AWS_BUCKET=corestagingbucket
+AWS_USE_PATH_STYLE_ENDPOINT=false
 }
 empty_keys () {
     echo "BUCKET_ACCESS_KEY=NONE" >> $GITHUB_OUTPUT
