@@ -23,7 +23,7 @@ fi
 BUCKET=$AWS_S3_BUCKET
 POLICY="policy${BUCKET}"
 USER="${BUCKET}"
-REGION=us-west-1
+REGION="${AWS_SECRET_REGION}"
 aws configure --profile s3-actions <<-EOF > /dev/null 2>&1
 ${AWS_ACCESS_KEY_ID}
 ${AWS_SECRET_ACCESS_KEY}
@@ -35,7 +35,7 @@ create_user () {
     aws iam create-policy --policy-name $POLICY --policy-document file://bucket_policy.json && \
     aws iam create-user --user-name $USER --region $REGION  && \
     ARN=$(aws iam list-policies --query 'Policies[?PolicyName==`'"$POLICY"'`]'.Arn --output text) && aws iam attach-user-policy --policy-arn $ARN --user-name $USER && \
-    generate_keys || empty_keys
+    generate_keys || user_keys
 }
 generate_keys () {
     RSP=$(aws iam create-access-key --user-name $USER);
@@ -48,9 +48,16 @@ generate_keys () {
     echo "AWS_USE_PATH_STYLE_ENDPOINT=false" >> .env;
     echo "COPIED S3 CONFIG TO ENV FILE";
 }
-empty_keys () {
-    echo "BUCKET_ACCESS_KEY=NONE" >> $GITHUB_OUTPUT
-    echo "BUCKET_ACCESS_ID=NONE" >> $GITHUB_OUTPUT
+user_keys () {
+   RSP=$(aws iam create-access-key --user-name $USER);
+       BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId');
+       BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey');
+       echo "${BUCKET_ACCESS_ID}";
+       echo "AWS_ACCESS_KEY_ID=${BUCKET_ACCESS_ID}" >> .env;
+       echo "AWS_SECRET_ACCESS_KEY=${BUCKET_ACCESS_KEY}" >> .env;
+       echo "AWS_DEFAULT_REGION=${AWS_SECRET_REGION}" >> .env;
+       echo "AWS_USE_PATH_STYLE_ENDPOINT=false" >> .env;
+       echo "COPIED S3 CONFIG TO ENV FILE";
 }
 #temporarily copying local dirs TODO
 populate_bucket () {
@@ -64,7 +71,6 @@ start_proc () {
 `aws s3api head-bucket --bucket $BUCKET`
 if [[ $? -eq 0 ]] ; then
     echo 'bucket exists';
-    generate_keys
 else    
     `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION` &&  aws iam get-user --user-name $USER &&  echo 'user exists' || create_user
 fi
