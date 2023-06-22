@@ -32,6 +32,7 @@ text
 EOF
 create_user () {
     `cp /home/install/resources/bucket_policy.json .` && sed -i "s/SOME_USER/$BUCKET/g" 'bucket_policy.json' && `echo pwd`
+    `cp /home/install/resources/cors.json .`
     aws iam create-policy --policy-name $POLICY --policy-document file://bucket_policy.json && \
     aws iam create-user --user-name $USER --region $REGION  && \
     ARN=$(aws iam list-policies --query 'Policies[?PolicyName==`'"$POLICY"'`]'.Arn --output text) && aws iam attach-user-policy --policy-arn $ARN --user-name $USER && \
@@ -72,7 +73,9 @@ start_proc () {
 if [[ $? -eq 0 ]] ; then
     echo 'bucket exists';
 else    
-    `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION` &&  aws iam get-user --user-name $USER &&  echo 'user exists' || create_user
+    `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION`;
+     `aws s3api put-bucket-cors --bucket $BUCKET --cors-configuration file://cors.json`;
+     aws iam get-user --user-name $USER &&  echo 'user exists' || create_user
 fi
 populate_bucket
 }
