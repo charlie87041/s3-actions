@@ -65,8 +65,10 @@ populate_bucket () {
     DIREXISTS=`aws s3 ls s3://$BUCKET/app/seeds/`
     if [[ $DIREXISTS == 'NONE' ]] ; then
         echo 'wating for drive'
-    fi 
-    echo 'coPied dirs to bucket'   
+    fi
+    `aws s3 cp --recursive s3://$BUCKET/templates/`
+    `aws s3 cp --recursive s3://$BUCKET/media/public`
+    echo 'coPied dirs to bucket'
 }
 start_proc () {
 `aws s3api head-bucket --bucket $BUCKET`
