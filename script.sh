@@ -33,6 +33,11 @@ generate_keys () {
     BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey')
     echo "BUCKET_ACCESS_ID=$BUCKET_ACCESS_ID" >> $GITHUB_ENV
     echo "BUCKET_ACCESS_KEY=$BUCKET_ACCESS_KEY" >> $GITHUB_ENV
+    # Create a JSON object with BUCKET_ACCESS_ID and BUCKET_ACCESS_KEY
+    JSON_DATA="{\"BUCKET_ACCESS_ID\":\"$BUCKET_ACCESS_ID\",\"BUCKET_ACCESS_KEY\":\"$BUCKET_ACCESS_KEY\"}"
+
+    # Store the JSON object as a SecureString parameter with the user name as the parameter name
+    aws ssm put-parameter --name "$USER" --type "SecureString" --value "$JSON_DATA" --region your-region
 }
 populate_bucket () {
     DIREXISTS=$(aws s3 ls s3://$BUCKET/templates/ --region $REGION 2>&1)
