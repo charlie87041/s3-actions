@@ -35,9 +35,10 @@ generate_keys () {
 #temporarily copying local dirs TODO
 populate_bucket () {
     DIREXISTS=$(aws s3 ls s3://$BUCKET/templates/ 2>&1)
-
+    echo "direxists $DIREXISTS"
     if [[ $DIREXISTS == '' ]] ; then
         aws s3api put-object --bucket $BUCKET --key templates/
+        echo 'created templates dir'
     fi
 
     DIREXISTS=$(aws s3 ls s3://$BUCKET/media/public/ 2>&1)
