@@ -30,9 +30,9 @@ ${AWS_SECRET_ACCESS_KEY}
 ${AWS_REGION}
 text
 EOF
+`cp /home/install/resources/cors.json .`
 create_user () {
     `cp /home/install/resources/bucket_policy.json .` && sed -i "s/SOME_USER/$BUCKET/g" 'bucket_policy.json' && `echo pwd`
-    `cp /home/install/resources/cors.json .`
     aws iam create-policy --policy-name $POLICY --policy-document file://bucket_policy.json && \
     aws iam create-user --user-name $USER --region $REGION  && \
     ARN=$(aws iam list-policies --query 'Policies[?PolicyName==`'"$POLICY"'`]'.Arn --output text) && aws iam attach-user-policy --policy-arn $ARN --user-name $USER && \
