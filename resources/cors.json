@@ -5,12 +5,13 @@
                 "*"
             ],
             "AllowedMethods": [
+                "GET",
                 "PUT",
-                "POST",
-                "DELETE"
+                "POST"
             ],
             "AllowedOrigins": [
-                "*"
+                "*",
+                "*.coreinvent.es"
             ],
             "ExposeHeaders": []
         }
