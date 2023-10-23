@@ -1,25 +1,11 @@
 #!/bin/bash
-if [ -z "$AWS_S3_BUCKET" ]; then
-  echo "AWS_S3_BUCKET is not set. Quitting."
+# Check for required environment variables
+if [ -z "$AWS_S3_BUCKET" ] || [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+  echo "One or more required environment variables are not set. Quitting."
   exit 1
 fi
 
-if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-  echo "AWS_ACCESS_KEY_ID is not set. Quitting."
-  exit 1
-fi
-
-if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
-  echo "AWS_SECRET_ACCESS_KEY is not set. Quitting."
-  exit 1
-fi
-
-
-if [ -z "$AWS_SECRET_REGION" ]; then
-  echo "AWS_SECRET_REGION is not set. Falling back to us-west-1."
-  AWS_SECRET_REGION='eu-south-2'
-fi
-
+AWS_SECRET_REGION="${AWS_SECRET_REGION:-eu-south-2}"
 BUCKET=$AWS_S3_BUCKET
 POLICY="policy${BUCKET}"
 USER="${BUCKET}"
@@ -62,23 +48,32 @@ user_keys () {
 }
 #temporarily copying local dirs TODO
 populate_bucket () {
-    DIREXISTS=`aws s3 ls s3://$BUCKET/app/seeds/`
-    if [[ $DIREXISTS == 'NONE' ]] ; then
-        echo 'wating for drive'
+    DIREXISTS=$(aws s3 ls s3://$BUCKET/templates/ 2>&1)
+
+    if [[ $DIREXISTS == '' ]] ; then
+        aws s3 sync /local/path/to/templates s3://$BUCKET/templates/
     fi
-    `aws s3 cp --recursive s3://$BUCKET/templates/`
-    `aws s3 cp --recursive s3://$BUCKET/media/public`
-    echo 'coPied dirs to bucket'
+
+    DIREXISTS=$(aws s3 ls s3://$BUCKET/media/public/ 2>&1)
+
+    if [[ $DIREXISTS == '' ]] ; then
+        aws s3 sync /local/path/to/media/public s3://$BUCKET/media/public/
+    fi
+
+    echo 'Copied directories to the bucket'
 }
 start_proc () {
-`aws s3api head-bucket --bucket $BUCKET`
-if [[ $? -eq 0 ]] ; then
-    echo 'bucket exists';
-else    
-    `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION`;
-     `aws s3api put-bucket-cors --bucket $BUCKET --cors-configuration file://cors.json`;
-     aws iam get-user --user-name $USER &&  echo 'user exists' || create_user
+if ! aws s3api head-bucket --bucket "$AWS_S3_BUCKET"; then
+     `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION`;
 fi
+
+if ! aws s3api get-bucket-cors --bucket "$AWS_S3_BUCKET" > /dev/null 2>&1; then
+    echo "Setting CORS configuration..."
+    aws s3api put-bucket-cors --bucket "$AWS_S3_BUCKET" --cors-configuration file://cors.json
+fi
+
+aws iam get-user --user-name "$AWS_S3_BUCKET" > /dev/null 2>&1 || create_user
+
 populate_bucket
 }
 start_proc
