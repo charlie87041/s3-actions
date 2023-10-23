@@ -35,27 +35,22 @@ generate_keys () {
 #temporarily copying local dirs TODO
 populate_bucket () {
     DIREXISTS=$(aws s3 ls s3://$BUCKET/templates/ --region $REGION 2>&1)
-    echo "direxists $DIREXISTS"
     if [[ -z $DIREXISTS ]] ; then
-        aws s3api put-object --bucket $BUCKET --key templates/ --region $REGION
-        echo 'created templates dir'
+        aws s3api put-object --bucket $BUCKET --key templates/ --region $REGION  > /dev/null
     fi
 
     DIREXISTS=$(aws s3 ls s3://$BUCKET/media/public/ --region $REGION 2>&1)
 
     if [[ -z $DIREXISTS ]] ; then
-      aws s3api put-object --bucket $BUCKET --key media/public/ --region $REGION
+      aws s3api put-object --bucket $BUCKET --key media/public/ --region $REGION  > /dev/null
     fi
-
-    echo 'Copied directories to the bucket'
 }
 start_proc () {
   if ! aws s3api head-bucket --bucket "$AWS_S3_BUCKET" > /dev/null 2>&1; then
-       `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION`;
+       `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION` ;
   fi
 
   if ! aws s3api get-bucket-cors --bucket "$AWS_S3_BUCKET" --region "$AWS_SECRET_REGION"> /dev/null 2>&1; then
-      echo "Setting CORS configuration to $AWS_SECRET_REGION"
       aws s3api put-bucket-cors --bucket "$AWS_S3_BUCKET" --cors-configuration file://cors.json --region $REGION
   fi
 
