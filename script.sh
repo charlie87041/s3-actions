@@ -29,6 +29,8 @@ create_user () {
 
 generate_keys () {
     RSP=$(aws iam create-access-key --user-name $USER)
+    BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId')
+    BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey')
     echo "BUCKET_ACCESS_ID=$BUCKET_ACCESS_ID" >> $GITHUB_ENV
     echo "BUCKET_ACCESS_KEY=$BUCKET_ACCESS_KEY" >> $GITHUB_ENV
 }
