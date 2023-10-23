@@ -63,18 +63,18 @@ populate_bucket () {
     echo 'Copied directories to the bucket'
 }
 start_proc () {
-if ! aws s3api head-bucket --bucket "$AWS_S3_BUCKET"; then
-     `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION`;
-fi
+  if ! aws s3api head-bucket --bucket "$AWS_S3_BUCKET"; then
+       `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION`;
+  fi
 
-if ! aws s3api get-bucket-cors --bucket "$AWS_S3_BUCKET" > /dev/null 2>&1; then
-    echo "Setting CORS configuration..."
-    aws s3api put-bucket-cors --bucket "$AWS_S3_BUCKET" --cors-configuration file://cors.json
-fi
+  if ! aws s3api get-bucket-cors --bucket "$AWS_S3_BUCKET" > /dev/null 2>&1; then
+      echo "Setting CORS configuration..."
+      aws s3api put-bucket-cors --bucket "$AWS_S3_BUCKET" --cors-configuration file://cors.json
+  fi
 
-aws iam get-user --user-name "$AWS_S3_BUCKET" > /dev/null 2>&1 || create_user
+  aws iam get-user --user-name "$AWS_S3_BUCKET" > /dev/null 2>&1 || create_user
 
-populate_bucket
+  populate_bucket
 }
 start_proc
 
