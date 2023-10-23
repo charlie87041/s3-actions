@@ -20,8 +20,8 @@ cp /home/install/resources/bucket_policy.json .
 cp /home/install/resources/cors.json .
 create_user () {
     sed -i "s/SOME_USER/$BUCKET/g" 'bucket_policy.json'
-    aws iam create-policy --policy-name $POLICY --policy-document file://bucket_policy.json
-    aws iam create-user --user-name $USER --region $REGION
+    aws iam create-policy --policy-name $POLICY --policy-document file://bucket_policy.json  > /dev/null
+    aws iam create-user --user-name $USER --region $REGION  > /dev/null
     ARN=$(aws iam list-policies --query 'Policies[?PolicyName==`'"$POLICY"'`]'.Arn --output text)
     aws iam attach-user-policy --policy-arn $ARN --user-name $USER
     generate_keys
