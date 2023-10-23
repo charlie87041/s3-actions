@@ -29,10 +29,9 @@ create_user () {
 
 generate_keys () {
     RSP=$(aws iam create-access-key --user-name $USER)
-    export BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId')
-    export BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey')
+    echo "BUCKET_ACCESS_ID=$BUCKET_ACCESS_ID" >> $GITHUB_ENV
+    echo "BUCKET_ACCESS_KEY=$BUCKET_ACCESS_KEY" >> $GITHUB_ENV
 }
-#temporarily copying local dirs TODO
 populate_bucket () {
     DIREXISTS=$(aws s3 ls s3://$BUCKET/templates/ --region $REGION 2>&1)
     if [[ -z $DIREXISTS ]] ; then
