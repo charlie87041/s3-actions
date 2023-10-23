@@ -37,7 +37,7 @@ generate_keys () {
     JSON_DATA="{\"BUCKET_ACCESS_ID\":\"$BUCKET_ACCESS_ID\",\"BUCKET_ACCESS_KEY\":\"$BUCKET_ACCESS_KEY\"}"
 
     # Store the JSON object as a SecureString parameter with the user name as the parameter name
-    aws ssm put-parameter --name "$USER" --type "SecureString" --value "$JSON_DATA" --region your-region
+    aws ssm put-parameter --name "$USER" --type "SecureString" --value "$JSON_DATA" --region $REGION
 }
 populate_bucket () {
     DIREXISTS=$(aws s3 ls s3://$BUCKET/templates/ --region $REGION 2>&1)
