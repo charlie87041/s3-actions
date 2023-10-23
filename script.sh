@@ -13,38 +13,24 @@ REGION="${AWS_SECRET_REGION}"
 aws configure --profile s3-actions <<-EOF > /dev/null 2>&1
 ${AWS_ACCESS_KEY_ID}
 ${AWS_SECRET_ACCESS_KEY}
-${AWS_REGION}
+${AWS_SECRET_REGION}
 text
 EOF
-`cp /home/install/resources/cors.json .`
+cp /home/install/resources/bucket_policy.json .
+cp /home/install/resources/cors.json .
 create_user () {
-    `cp /home/install/resources/bucket_policy.json .` && sed -i "s/SOME_USER/$BUCKET/g" 'bucket_policy.json' && `echo pwd`
-    aws iam create-policy --policy-name $POLICY --policy-document file://bucket_policy.json && \
-    aws iam create-user --user-name $USER --region $REGION  && \
-    ARN=$(aws iam list-policies --query 'Policies[?PolicyName==`'"$POLICY"'`]'.Arn --output text) && aws iam attach-user-policy --policy-arn $ARN --user-name $USER && \
-    generate_keys || user_keys
+    sed -i "s/SOME_USER/$BUCKET/g" 'bucket_policy.json'
+    aws iam create-policy --policy-name $POLICY --policy-document file://bucket_policy.json
+    aws iam create-user --user-name $USER --region $REGION
+    ARN=$(aws iam list-policies --query 'Policies[?PolicyName==`'"$POLICY"'`]'.Arn --output text)
+    aws iam attach-user-policy --policy-arn $ARN --user-name $USER
+    generate_keys
 }
+
 generate_keys () {
-    RSP=$(aws iam create-access-key --user-name $USER);
-    BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId');
-    BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey');
-    echo "${BUCKET_ACCESS_ID}";
-    echo "AWS_ACCESS_KEY_ID=${BUCKET_ACCESS_ID}" >> .env;
-    echo "AWS_SECRET_ACCESS_KEY=${BUCKET_ACCESS_KEY}" >> .env;
-    echo "AWS_DEFAULT_REGION=${AWS_SECRET_REGION}" >> .env;
-    echo "AWS_USE_PATH_STYLE_ENDPOINT=false" >> .env;
-    echo "COPIED S3 CONFIG TO ENV FILE";
-}
-user_keys () {
-   RSP=$(aws iam create-access-key --user-name $USER);
-       BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId');
-       BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey');
-       echo "${BUCKET_ACCESS_ID}";
-       echo "AWS_ACCESS_KEY_ID=${BUCKET_ACCESS_ID}" >> .env;
-       echo "AWS_SECRET_ACCESS_KEY=${BUCKET_ACCESS_KEY}" >> .env;
-       echo "AWS_DEFAULT_REGION=${AWS_SECRET_REGION}" >> .env;
-       echo "AWS_USE_PATH_STYLE_ENDPOINT=false" >> .env;
-       echo "COPIED S3 CONFIG TO ENV FILE";
+    RSP=$(aws iam create-access-key --user-name $USER)
+    export BUCKET_ACCESS_ID=$(echo $RSP | jq -r '.AccessKey.AccessKeyId')
+    export BUCKET_ACCESS_KEY=$(echo $RSP | jq -r '.AccessKey.SecretAccessKey')
 }
 #temporarily copying local dirs TODO
 populate_bucket () {
@@ -67,7 +53,7 @@ start_proc () {
        `aws s3api create-bucket --bucket $BUCKET --create-bucket-configuration LocationConstraint=$REGION --region $REGION`;
   fi
 
-  if ! aws s3api get-bucket-cors --bucket "$AWS_S3_BUCKET" > /dev/null 2>&1; then
+  if ! aws s3api get-bucket-cors --bucket "$AWS_S3_BUCKET" --region "$AWS_SECRET_REGION"> /dev/null 2>&1; then
       echo "Setting CORS configuration..."
       aws s3api put-bucket-cors --bucket "$AWS_S3_BUCKET" --cors-configuration file://cors.json
   fi
