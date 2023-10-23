@@ -55,8 +55,8 @@ start_proc () {
   fi
 
   if ! aws s3api get-bucket-cors --bucket "$AWS_S3_BUCKET" --region "$AWS_SECRET_REGION"> /dev/null 2>&1; then
-      echo "Setting CORS configuration..."
-      aws s3api put-bucket-cors --bucket "$AWS_S3_BUCKET" --cors-configuration file://cors.json
+      echo "Setting CORS configuration to $AWS_SECRET_REGION"
+      aws s3api put-bucket-cors --bucket "$AWS_S3_BUCKET" --cors-configuration file://cors.json --region $REGION
   fi
 
   aws iam get-user --user-name "$AWS_S3_BUCKET" > /dev/null 2>&1 || create_user
