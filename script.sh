@@ -37,13 +37,13 @@ populate_bucket () {
     DIREXISTS=$(aws s3 ls s3://$BUCKET/templates/ 2>&1)
 
     if [[ $DIREXISTS == '' ]] ; then
-        aws s3 sync /local/path/to/templates s3://$BUCKET/templates/
+        aws s3api put-object --bucket $BUCKET --key templates/
     fi
 
     DIREXISTS=$(aws s3 ls s3://$BUCKET/media/public/ 2>&1)
 
     if [[ $DIREXISTS == '' ]] ; then
-        aws s3 sync /local/path/to/media/public s3://$BUCKET/media/public/
+      aws s3api put-object --bucket $BUCKET --key media/public/
     fi
 
     echo 'Copied directories to the bucket'
